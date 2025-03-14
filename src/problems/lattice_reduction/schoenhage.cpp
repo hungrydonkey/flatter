@@ -34,7 +34,7 @@ void Schoenhage::configure(const LatticeReductionParams& p, const ComputationCon
     }
 
     Base::configure(p, cc);
-    assert(n == 2);
+    assert(n <= 2);
     assert(M.type() == ElementType::MPZ);
     assert(U.type() == ElementType::MPZ);
 
@@ -435,6 +435,15 @@ void Schoenhage::recursive(mpz_t& a, mpz_t& b, mpz_t& c, unsigned int m, Matrix 
 
 void Schoenhage::solve() {
     log_start();
+
+    if (n == 1) {
+        long exp;
+        double d = mpz_get_d_2exp(&exp, M.data<mpz_t>()(0,0));
+        params.L.profile[0] = exp + log2(fabs(d));
+        U.set_identity();
+        log_end();
+        return;
+    }
 
     mpz_t a, b, c;
     unsigned int m = 0; // s = 2**m = 1
